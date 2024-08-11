@@ -2,11 +2,10 @@ import conf.ServerConfig;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Client {
     public static Socket clientSocket; //сокет для общения
-    public static BufferedWriter out;
-    public static BufferedReader in;
     public static final FileOutputStream writer;
 
     static {
@@ -30,10 +29,19 @@ public class Client {
     public static void exit() {
         try {
             writer.close();
-            in.close();
-            out.close();
             clientSocket.close();
         } catch (Exception ex) {
+        }
+    }
+
+    public static void writeLog(String message) {
+        synchronized (Client.writer) {
+            String messageForLog = message + "\n";
+            try {
+                Client.writer.write(messageForLog.getBytes(StandardCharsets.UTF_8));
+            } catch (Exception ex) {
+                System.out.println("Данные не сохранились");
+            }
         }
     }
 }

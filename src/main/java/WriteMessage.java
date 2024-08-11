@@ -2,10 +2,11 @@ import java.io.*;
 
 public class WriteMessage extends Thread {
     private final BufferedReader reader; // нам нужен ридер читающий с консоли, чтобы узнать что хочет сказать клиент
+    private final BufferedWriter out;
 
     public WriteMessage() throws IOException {
         reader = new BufferedReader(new InputStreamReader(System.in));
-        Client.out = new BufferedWriter(new OutputStreamWriter(Client.clientSocket.getOutputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(Client.clientSocket.getOutputStream()));
         start();
     }
 
@@ -16,15 +17,17 @@ public class WriteMessage extends Thread {
                 if (!Client.clientSocket.isClosed()) {
                     String word = reader.readLine(); // ждём пока клиент что-нибудь напишет
                     if (word.equals("/exit")) {
-                        Client.out.write("/exit" + "\n");
+                        out.write("/exit" + "\n");
                         break;
                     }
-                    Client.out.write(word + "\n"); // отправляем сообщение на сервер
-                    Client.out.flush();
+                    out.write(word + "\n"); // отправляем сообщение на сервер
+                    out.flush();
                 } else {
                     break;
                 }
             }
+            reader.close();
+            out.close();
             Client.exit();
         } catch (Exception exception) {
             Client.exit();
