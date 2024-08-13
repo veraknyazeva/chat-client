@@ -1,18 +1,14 @@
 import java.io.*;
 
 public class WriteMessage extends Thread {
-    private final BufferedReader reader; // нам нужен ридер читающий с консоли, чтобы узнать что хочет сказать клиент
-    private final BufferedWriter out;
-
     public WriteMessage() throws IOException {
-        reader = new BufferedReader(new InputStreamReader(System.in));
-        out = new BufferedWriter(new OutputStreamWriter(Client.clientSocket.getOutputStream()));
         start();
     }
 
     @Override
     public void run() {
-        try {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(Client.clientSocket.getOutputStream()))) {
             while (true) {
                 if (!Client.clientSocket.isClosed()) {
                     String word = reader.readLine(); // ждём пока клиент что-нибудь напишет
@@ -26,8 +22,6 @@ public class WriteMessage extends Thread {
                     break;
                 }
             }
-            reader.close();
-            out.close();
             Client.exit();
         } catch (Exception exception) {
             Client.exit();
